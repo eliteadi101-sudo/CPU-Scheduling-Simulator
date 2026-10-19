@@ -1,0 +1,10 @@
+const $=s=>document.querySelector(s);$("#algorithm").onchange=()=>document.body.classList.toggle("rr",$("#algorithm").value==="rr");$("#run").onclick=run;
+function run(){const bursts=$("#bursts").value.split(",").map(x=>Number(x.trim()));$("#error").textContent="";if(!bursts.length||bursts.some(x=>!Number.isInteger(x)||x<1)||bursts.length>20){$("#error").textContent="Enter 1–20 positive whole-number burst times, separated by commas.";return}
+const alg=$("#algorithm").value,procs=bursts.map((bt,i)=>({id:i+1,bt,remaining:bt,ct:0,wt:0,tat:0}));let time=0,segments=[];
+function add(p,d){if(d<=0)return;segments.push({id:p.id,start:time,end:time+d,duration:d});time+=d}
+if(alg==="fcfs"){procs.forEach(p=>{add(p,p.bt);p.ct=time})}
+else if(alg==="sjf"){[...procs].sort((a,b)=>a.bt-b.bt||a.id-b.id).forEach(p=>{add(p,p.bt);p.ct=time})}
+else{const q=Number($("#quantum").value);if(!Number.isInteger(q)||q<1){$("#error").textContent="Time quantum must be a positive integer.";return}let queue=[...procs];while(queue.some(p=>p.remaining>0)){const p=queue.shift();if(p.remaining<=0)continue;const d=Math.min(q,p.remaining);add(p,d);p.remaining-=d;if(!p.remaining)p.ct=time;else queue.push(p)}}
+procs.forEach(p=>{p.tat=p.ct;p.wt=p.tat-p.bt});$("#gantt").innerHTML="";segments.forEach(s=>{const b=document.createElement("div");b.className="block";b.style.setProperty("--duration",s.duration);b.title=`P${s.id}: ${s.start}–${s.end}`;b.textContent=`P${s.id}`;$("#gantt").append(b)});$("#ticks").innerHTML=`<span>0</span><span>${time} units</span>`;
+$("#results").innerHTML=`<table><thead><tr><th>Process</th><th>Burst</th><th>Completion</th><th>Waiting</th><th>Turnaround</th></tr></thead><tbody>${procs.map(p=>`<tr><td>P${p.id}</td><td>${p.bt}</td><td>${p.ct}</td><td>${p.wt}</td><td>${p.tat}</td></tr>`).join("")}</tbody></table>`;$("#averages").textContent=`Average waiting time: ${(procs.reduce((a,p)=>a+p.wt,0)/procs.length).toFixed(2)} · Average turnaround time: ${(procs.reduce((a,p)=>a+p.tat,0)/procs.length).toFixed(2)}`}
+run();

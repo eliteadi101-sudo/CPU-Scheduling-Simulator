@@ -1,0 +1,5 @@
+{
+  "name": "CPU Scheduling Simulator",
+  "stack": "HTML, CSS, JavaScript",
+  "description": "Compare FCFS, non-preemptive SJF, and Round Robin with a Gantt chart and average waiting/turnaround times."
+}
